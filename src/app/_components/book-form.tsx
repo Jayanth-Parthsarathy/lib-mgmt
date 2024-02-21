@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { DataTable } from "./book-data-table";
 import { columns } from "./book-columns";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   title: z.string(),
@@ -27,6 +28,7 @@ const formSchema = z.object({
 });
 
 const BookForm = () => {
+  const utils = api.useUtils();
   const { toast } = useToast();
   const { data } = api.book.books.useQuery();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,11 +41,14 @@ const BookForm = () => {
       publishedAt: "",
     },
   });
+  const router = useRouter();
   const { mutate: createBook } = api.book.create.useMutation({
-    onSuccess() {
+    onSuccess: async() => {
+      await utils.book.invalidate();
       toast({
         title: "Book created sucessfully",
       });
+      router.refresh();
     },
   });
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -135,13 +140,7 @@ const BookForm = () => {
           <Button type="submit">Submit</Button>
         </form>
       </Form>
-      <div>
-      {data && <DataTable
-          columns={columns}
-          data={data}
-        />
-      }
-      </div>
+      <div>{data && <DataTable columns={columns} data={data} />}</div>
     </div>
   );
 };
