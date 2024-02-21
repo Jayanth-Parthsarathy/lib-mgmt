@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  app:
+  lib-app:
     platform: "linux/amd64"
     build:
       context: .
@@ -12,26 +12,27 @@ services:
     ports:
       - "3000:3000"
     image: lib-t3
-    env_file:
-      - .env
+    environment:
+      - DATABASE_URL=$DATABASE_URL
+    command: sh -c "./wait-for-it.sh db:5432 -- npx prisma db push && node server.js"
     depends_on:
-      - db
+      - lib-db
     networks:
-      - lib-net
+      - lib_net
 
-  db:
+  lib-db:
     ports:
       - "5432:5432"
     image: postgres
     environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=libdb
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+      - POSTGRES_DB=$DB_NAME
     networks:
-      - lib-net
+      - lib_net
     volumes:
       - lib:/var/lib/postgresql
 
 networks:
-  lib-net:
+  lib_net:
 volumes:
   lib:

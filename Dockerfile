@@ -1,6 +1,6 @@
 ##### DEPENDENCIES
 
-from node:20.9.0-slim as deps
+FROM node:20.9.0-slim AS deps
 RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 
@@ -21,7 +21,7 @@ RUN \
 
 ##### BUILDER
 
-from node:20.9.0-slim as builder
+FROM node:20.9.0-slim AS builder
 RUN apt-get update -y && apt-get install -y openssl
 ARG DATABASE_URL
 ARG NEXT_PUBLIC_CLIENTVAR
@@ -29,7 +29,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN \
  if [ -f yarn.lock ]; then SKIP_ENV_VALIDATION=1 yarn build; \
@@ -40,28 +40,29 @@ RUN \
 
 ##### RUNNER
 
-from node:20.9.0-slim as runner
+FROM node:20.9.0-slim AS runner
 RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 COPY prisma ./
 
 ENV NODE_ENV production
 
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# RUN addgroup --system --gid 1001 nodejs
+# RUN adduser --system --uid 1001 nextjs
 
-COPY .env ./
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN chmod +x wait-for-it.sh
 EXPOSE 3000
 ENV PORT 3000
 
-CMD ["node", "server.js"]
+CMD ["server.js"]
 
