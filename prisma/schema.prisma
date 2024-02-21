@@ -22,3 +22,14 @@ model Book {
 
   @@index([id])
 }
+
+model Employee {
+  id          String   @id @default(cuid())
+  name        String
+  department  String
+  designation String
+  salary      Float
+  dateOfBirth DateTime
+  customId    String
+  gender      String
+}
