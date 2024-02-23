@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { time } from "console";
 
 export const bookRouter = createTRPCRouter({
   create: publicProcedure
@@ -15,6 +16,10 @@ export const bookRouter = createTRPCRouter({
     )
     .mutation(async ({ input, ctx }) => {
       const { title, subject, author, price, publishedAt } = input;
+      const now = new Date();
+      if (publishedAt > now) {
+        return "Future"
+      }
       await ctx.db.book.create({
         data: {
           title,

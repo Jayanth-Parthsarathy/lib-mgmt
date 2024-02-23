@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-async function seedBooks() {
+export async function seedBooks() {
   const books = [];
   const subjects = [
     "Fiction",
@@ -50,23 +50,3 @@ async function seedBooks() {
 
   return books;
 }
-
-async function main() {
-  const books = await seedBooks();
-  await prisma.book.createMany({
-    data: books,
-  });
-}
-
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-
-  .catch(async (e) => {
-    console.error(e);
-
-    await prisma.$disconnect();
-
-    process.exit(1);
-  });

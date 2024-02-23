@@ -43,11 +43,17 @@ const BookForm = () => {
   });
   const router = useRouter();
   const { mutate: createBook } = api.book.create.useMutation({
-    onSuccess: async() => {
+    onSuccess: async (data) => {
       await utils.book.invalidate();
-      toast({
-        title: "Book created sucessfully",
-      });
+      if (data == "Future") {
+        toast({
+          title: "Error cannot add book published in future",
+        });
+      } else {
+        toast({
+          title: "Book created sucessfully",
+        });
+      }
       router.refresh();
     },
   });
