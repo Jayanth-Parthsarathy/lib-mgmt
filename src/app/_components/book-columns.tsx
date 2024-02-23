@@ -3,6 +3,7 @@
 import type { Book } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +48,11 @@ export const columns: ColumnDef<Book>[] = [
   {
     accessorKey: "publishedAt",
     header: "Publication date",
+    cell: ({ row }) => {
+      const amount = new Date(row.getValue("publishedAt"));
+      const formatted = format(amount, "PPP");
+      return <div className="font-medium">{formatted}</div>;
+    },
   },
   {
     id: "actions",
