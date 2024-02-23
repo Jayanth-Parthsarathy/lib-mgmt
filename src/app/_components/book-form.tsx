@@ -20,9 +20,9 @@ import { columns } from "./book-columns";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  title: z.string(),
-  subject: z.string(),
-  author: z.string(),
+  title: z.string().min(3).max(100),
+  subject: z.string().min(3).max(200),
+  author: z.string().min(3).max(200),
   price: z.string(),
   publishedAt: z.string(),
 });
